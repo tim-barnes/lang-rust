@@ -25,41 +25,45 @@ impl State for SomeState {
     }
 }
 
+
+enum Messages {
+    PlusOne,
+    TimesTen,
+}
+
+
+
 trait Reducer {
     type StateType;
+    type MessageType;
 
-    fn reduce(&self, state: &Self::StateType) -> Self::StateType;
+    fn reduce(&self, state: &Self::StateType, message: &Self::MessageType) -> Self::StateType;
 }
 
 
-struct PlusOne;
-impl Reducer for PlusOne {
+struct SomeReducer;
+impl Reducer for SomeReducer {
     type StateType = SomeState;
+    type MessageType = Messages;
 
-    fn reduce(&self, state: &Self::StateType) -> Self::StateType {
-        return Self::StateType {
-            i: state.i + 1,
-            s: state.s.clone(),
-            d: state.d + 1.0,
+    fn reduce(&self, state: &Self::StateType, message: &Self::MessageType) -> Self::StateType {
+        match message {
+            Messages::PlusOne => Self::StateType {
+                i: state.i + 1,
+                s: state.s.clone(),
+                d: state.d + 1.0,
+            },
+            Messages::TimesTen => Self::StateType {
+                i: state.i * 10,
+                s: state.s.clone(),
+                d: state.d * 10.0,
+            }
         }
     }
 }
 
-struct TimesTen;
-impl Reducer for TimesTen {
-    type StateType = SomeState;
 
-    fn reduce(&self, state: &Self::StateType) -> Self::StateType {
-        return Self::StateType {
-            i: state.i * 10,
-            s: state.s.clone(),
-            d: state.d * 10.0,
-        }
-    }
-}
-
-
-struct StateWrapper<S: State>(Box<S>, Vec<Box<Reducer<StateType=S>>>);
+struct StateWrapper<S: State>(Box<S>, Vec<Box<Reducer<StateType=S, MessageType=Messages>>>);
 
 impl <S: State> State for StateWrapper<S> {
     type StateType = S;
@@ -71,9 +75,9 @@ impl <S: State> State for StateWrapper<S> {
 }
 
 impl <S: State> StateWrapper<S>  {
-    fn reduce(&mut self) {
+    fn reduce(&mut self, message: &Messages) {
         for i in &mut self.1 {
-            self.0 = Box::new(i.reduce(&*self.0));
+            self.0 = Box::new(i.reduce(&*self.0, message));
         }
     }
 }
@@ -100,22 +104,23 @@ fn main() {
 
     println!("--- Reducer PlusOne ---");
 
-    let r = PlusOne;
+    let r = SomeReducer;
+    let msg = Messages::PlusOne;
 
-    s = r.reduce(&s);
-    b = Box::new(r.reduce(&*b));
+    s = r.reduce(&s, &msg);
+    b = Box::new(r.reduce(&*b, &msg));
 
     println!("{}", s.to_string());
     println!("{}", (*b).to_string());
 
 
     println!("--- StateWrapper ---");
-    let mut reducers: Vec<Box<Reducer<StateType=SomeState>>> = Vec::new();
-    reducers.push(Box::new(TimesTen));
-    reducers.push(Box::new(PlusOne));
+    let mut reducers: Vec<Box<Reducer<StateType=SomeState, MessageType=Messages>>> = Vec::new();
+    reducers.push(Box::new(SomeReducer));
 
     let mut w = StateWrapper(Box::new(s), reducers);
     println!("*** Before: \n{}", w.to_string());
-    w.reduce();
+    w.reduce(&Messages::TimesTen);
+    w.reduce(&Messages::PlusOne);
     println!("*** After: \n{}", w.to_string());
 }
