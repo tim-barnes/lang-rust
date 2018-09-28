@@ -27,8 +27,8 @@ impl State for SomeState {
 
 
 enum Messages {
-    PlusOne,
-    TimesTen,
+    Add(i32),
+    Multiply(i32),
 }
 
 
@@ -48,15 +48,15 @@ impl Reducer for SomeReducer {
 
     fn reduce(&self, state: &Self::StateType, message: &Self::MessageType) -> Self::StateType {
         match message {
-            Messages::PlusOne => Self::StateType {
-                i: state.i + 1,
+            Messages::Add(x) => Self::StateType {
+                i: state.i + x,
                 s: state.s.clone(),
-                d: state.d + 1.0,
+                d: state.d + (*x as f64),
             },
-            Messages::TimesTen => Self::StateType {
-                i: state.i * 10,
+            Messages::Multiply(x) => Self::StateType {
+                i: state.i * x,
                 s: state.s.clone(),
-                d: state.d * 10.0,
+                d: state.d * (*x as f64),
             }
         }
     }
@@ -105,7 +105,7 @@ fn main() {
     println!("--- Reducer PlusOne ---");
 
     let r = SomeReducer;
-    let msg = Messages::PlusOne;
+    let msg = Messages::Add(123);
 
     s = r.reduce(&s, &msg);
     b = Box::new(r.reduce(&*b, &msg));
@@ -120,7 +120,7 @@ fn main() {
 
     let mut w = StateWrapper(Box::new(s), reducers);
     println!("*** Before: \n{}", w.to_string());
-    w.reduce(&Messages::TimesTen);
-    w.reduce(&Messages::PlusOne);
+    w.reduce(&Messages::Multiply(10));
+    w.reduce(&Messages::Add(1));
     println!("*** After: \n{}", w.to_string());
 }
