@@ -11,7 +11,6 @@ trait State {
     type StateType;
 
     fn to_string(&self) -> String;
-    fn as_state(&self) -> &Self::StateType;
 }
 
 
@@ -24,17 +23,7 @@ impl State for SomeState {
                 self.s,
                 self.d)
     }
-
-    fn as_state(&self) -> &Self::StateType {
-        return self;
-    }
 }
-
-fn state_str<T: State>(s: &T) -> String
-{
-    return s.to_string();
-}
-
 
 trait Reducer {
     type StateType;
@@ -79,9 +68,6 @@ impl <S: State> State for StateWrapper<S> {
         return (&*self.0).to_string();
     }
 
-    fn as_state(&self) -> &Self::StateType {
-        return &*self.0;
-    }
 }
 
 impl <S: State> StateWrapper<S>  {
@@ -107,8 +93,8 @@ fn main() {
         d: 2.345E-1,
     });
 
-    println!("{}", state_str(&s));
-    println!("{}", state_str(&*b));
+    println!("{}", s.to_string());
+    println!("{}", (*b).to_string());
 
     // See if a naive reducer works
 
@@ -119,8 +105,8 @@ fn main() {
     s = r.reduce(&s);
     b = Box::new(r.reduce(&*b));
 
-    println!("{}", state_str(&s));
-    println!("{}", state_str(&*b));
+    println!("{}", s.to_string());
+    println!("{}", (*b).to_string());
 
 
     println!("--- StateWrapper ---");
