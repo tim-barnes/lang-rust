@@ -1,0 +1,21 @@
+[package]
+name = "grpcio-poc"
+version = "0.1.0"
+authors = ["Tim Barnes <tim.barnes@project-tracr.com>"]
+build = "build.rs"
+
+[lib]
+name = "protos"
+path = "src/protos/mod.rs"
+
+[[bin]]
+name = "server"
+path = "src/server.rs"
+
+[dependencies]
+futures = "0.1.16"
+grpcio = "0.2.0"
+protobuf = "1.4.1"
+
+[build-dependencies]
+protoc-grpcio = "0.1.1"

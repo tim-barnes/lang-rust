@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package rusty;
+
+// simple processor
+service rustserver {
+  rpc Process(Request) returns (Response) {}
+}
+
+// Simple request
+message Request {
+    string original_file_name = 1; // The original file name of the asset
+    bytes content = 2; // File content, which may be compressed by using the specified compression_method
+}
+
+// Response
+message Response {
+    bytes fek = 1; // The key for the content
+    bytes econtent = 2; // The encrypted content
+}
