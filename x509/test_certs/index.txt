@@ -1,0 +1,1 @@
+V	191107141212Z		1000	unknown	/C=GB/ST=England/O=Alice Ltd/OU=Alice Ltd Certificate Authority/CN=Intermediate CA
